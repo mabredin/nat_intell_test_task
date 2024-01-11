@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "nat-intel-microservice-1"
+version = "0.1.0"
+description = ""
+authors = ["mabredin <mbredin@bk.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.108.0"
+sqlalchemy = "^2.0.25"
+asyncpg = "^0.29.0"
+uvicorn = "^0.25.0"
+alembic = "^1.13.1"
+pydantic-settings = "^2.1.0"
+python-dotenv = "^1.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.1"
+isort = "^5.13.2"
+ruff = "^0.1.11"
+ipython = "^8.20.0"
+mypy = "^1.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
