@@ -12,8 +12,7 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from config import database_settings
-import db.models
-from db import Base
+from db import Base, Proposal, User, Vote
 
 
 config = context.config

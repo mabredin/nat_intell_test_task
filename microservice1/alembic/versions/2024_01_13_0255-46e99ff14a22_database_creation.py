@@ -1,8 +1,8 @@
 """Database creation
 
-Revision ID: 0cbd3f4259e0
+Revision ID: 46e99ff14a22
 Revises: 
-Create Date: 2024-01-10 02:21:40.395064
+Create Date: 2024-01-13 02:55:59.463526
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "0cbd3f4259e0"
+revision: str = "46e99ff14a22"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -43,10 +43,7 @@ def upgrade() -> None:
         "user",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("username", sa.String(), nullable=False),
-        sa.Column("password", sa.String(), nullable=False),
         sa.Column("wallet_address", sa.String(), nullable=False),
-        sa.Column("role", sa.Enum("admin", "user", name="role"), nullable=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("block_number", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
@@ -60,6 +57,10 @@ def upgrade() -> None:
             server_default=sa.text("TIMEZONE('utc', now())"),
             nullable=False,
         ),
+        sa.Column("email", sa.String(), nullable=True),
+        sa.Column("hash_password", sa.String(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("wallet_address"),
     )
@@ -68,9 +69,7 @@ def upgrade() -> None:
         sa.Column("proposal_id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column(
-            "choice",
-            sa.Enum("in_favor", "against", name="responseoptions"),
-            nullable=False,
+            "choice", sa.Enum("in_favor", "against", name="variant"), nullable=False
         ),
         sa.Column(
             "created_at",

@@ -14,14 +14,15 @@ uvicorn = "^0.25.0"
 alembic = "^1.13.1"
 pydantic-settings = "^2.1.0"
 python-dotenv = "^1.0.0"
+gunicorn = "^21.2.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.6"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12.1"
 isort = "^5.13.2"
-ruff = "^0.1.11"
-ipython = "^8.20.0"
-mypy = "^1.8.0"
 
 [build-system]
 requires = ["poetry-core"]
