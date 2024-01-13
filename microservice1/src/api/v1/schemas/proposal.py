@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
-class ProposalBase(BaseModel):
+class ProposalCreateUpdate(BaseModel):
     title: str
     description: str
+
+
+class ProposalDelete(BaseModel):
+    id: int

@@ -53,11 +53,6 @@ class User(Base):
     )
 
 
-class Variant(enum.Enum):
-    in_favor = "In favor"
-    against = "Against"
-
-
 class Vote(Base):
     __tablename__ = "vote"
 
@@ -69,7 +64,7 @@ class Vote(Base):
         ForeignKey("user.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    choice: Mapped[Variant]
+    is_like: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[created_at]
     user_balance: Mapped[Decimal]
     block_number: Mapped[int]

@@ -14,7 +14,7 @@ from services.token import authenticate_user, create_access_token
 token_router = APIRouter(tags=["token"])
 
 
-@token_router.post("/", response_model=Token, status_code=status.HTTP_200_OK)
+@token_router.post("/token", response_model=Token, status_code=status.HTTP_200_OK)
 async def login_for_access_token(
     data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: AsyncSession = Depends(get_session),

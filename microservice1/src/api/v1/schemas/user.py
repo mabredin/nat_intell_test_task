@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class GetUserRequest(BaseModel):
+class GetFullUser(BaseModel):
     id: int
     email: str | None = None
     username: str
@@ -12,10 +12,19 @@ class GetUserRequest(BaseModel):
     is_verified: bool = False
 
 
-class CreateUserRequest(BaseModel):
+class CreateUser(BaseModel):
     username: str
     hashed_password: str
     email: str | None = None
     wallet_address: str
     block_number: int
     is_superuser: bool = False
+
+
+class GetUser(BaseModel):
+    username: str
+    email: str | None = None
+    wallet_address: str
+    block_number: int
+    is_superuser: bool = False
+    is_active: bool = True

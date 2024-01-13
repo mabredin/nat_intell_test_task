@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Sequence
 
 from fastapi import Depends, HTTPException
 from jose import JWTError, jwt
@@ -6,20 +6,20 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from api.v1.schemas.user import CreateUserRequest
+from api.v1.schemas import user as UserSchema
 from config import token_settings
 from db.base import get_session
 from db.models import User
 
 
-async def get_user_by_id(user_id: int, session: AsyncSession):
+async def get_user_by_id(user_id: int, session: AsyncSession) -> User:
     query = select(User).where(User.id == user_id)
     result = await session.execute(query)
     user = result.scalars().first()
     return user
 
 
-async def get_users(session: AsyncSession):
+async def get_users(session: AsyncSession) -> Sequence[User]:
     query = select(User).order_by("id")
     result = await session.execute(query)
     return result.scalars().all()
@@ -28,7 +28,7 @@ async def get_users(session: AsyncSession):
 async def get_current_user(
     token: Annotated[str, Depends(token_settings.oauth2_scheme)],
     session: AsyncSession = Depends(get_session),
-):
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials!",
@@ -49,15 +49,15 @@ async def get_current_user(
 
 async def get_current_active_user(
     current_user: Annotated[User, Depends(get_current_user)]
-):
+) -> User:
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
 async def create_user(
-    new_user: CreateUserRequest, session: AsyncSession = Depends(get_session)
-) -> User:
+    new_user: UserSchema.CreateUser, session: AsyncSession = Depends(get_session)
+) -> UserSchema.GetUser:
     wallet = await is_exist_wallet(new_user, session)
     if wallet:
         raise HTTPException(
@@ -77,7 +77,13 @@ async def create_user(
     try:
         session.add(user)
         await session.commit()
-        return {"status": "success"}
+        return UserSchema.GetUser(
+            username=new_user.username,
+            email=new_user.email,
+            wallet_address=new_user.wallet_address,
+            block_number=new_user.block_number,
+            is_superuser=new_user.is_superuser,
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -87,7 +93,7 @@ async def create_user(
 
 
 async def is_exist_wallet(
-    new_user: CreateUserRequest, session: AsyncSession = Depends(get_session)
+    new_user: UserSchema.CreateUser, session: AsyncSession = Depends(get_session)
 ) -> bool:
     query = select(User).where(User.wallet_address == new_user.wallet_address)
     result = await session.execute(query)
