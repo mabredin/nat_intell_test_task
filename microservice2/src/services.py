@@ -17,8 +17,8 @@ def get_balance_by_address(address: str) -> schemas.GetBalance:
             detail="Не удалось подключиться к сети goerli",
         )
     balance = w3.eth.get_balance(address)
-
-    return schemas.GetBalance(balance=w3.from_wei(balance, "ether"))
+    balance = w3.from_wei(balance, "ether")
+    return schemas.GetBalance(balance=balance)
 
 
 def get_info_by_latest_block() -> schemas.GetInfoByBlock:

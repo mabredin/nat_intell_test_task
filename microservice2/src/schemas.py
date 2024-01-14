@@ -1,9 +1,10 @@
+from decimal import Decimal
+
 from pydantic import BaseModel
-from web3.types import Wei
 
 
 class GetBalance(BaseModel):
-    balance: Wei
+    balance: int | Decimal
 
 
 class GetInfoByBlock(BaseModel):
