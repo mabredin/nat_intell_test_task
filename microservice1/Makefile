@@ -10,9 +10,3 @@ migrate:
 lint:
 		$(PACKAGE_MANAGER_RUNNER) black src
 		$(PACKAGE_MANAGER_RUNNER) isort src
-
-docker-up:
-		docker compose up -d
-
-docker-down:
-		docker compose down -v
