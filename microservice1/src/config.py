@@ -1,12 +1,14 @@
 import os
 
+import grpc
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic_settings import BaseSettings
 
-dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
-load_dotenv(dotenv_path)
+from protobufs import communication_pb2, communication_pb2_grpc
+
+load_dotenv()
 
 
 class AppSettings(BaseSettings):
@@ -26,7 +28,7 @@ class DatabaseSettings(BaseSettings):
     POSTGRES_PORT: str = os.getenv("DB_PORT") or "5432"
     POSTGRES_USER: str = os.getenv("POSTGRES_USER") or "postgres"
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD") or "postgres"
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB") or "nat_intel"
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB") or "test_db"
     echo: bool = os.getenv("ECHO") or False
 
     @property
@@ -78,7 +80,31 @@ class OuterMicroserviceSettings(BaseSettings):
         return OAuth2PasswordBearer(tokenUrl="api/v1/token")
 
 
+class Microservice2Client:
+    def __init__(self):
+        self.grpc_address: str = os.getenv("GRPC_ADDRESS")
+        self.channel = grpc.insecure_channel(self.grpc_address)
+        self.stub = communication_pb2_grpc.CommunicatorStub(self.channel)
+
+    def get_balance(self, address: str):
+        request = communication_pb2.BalanceRequest(address=address)
+        response = self.stub.GetBalance(request)
+        return response.balance
+
+    def get_latest_block(self) -> int:
+        request = communication_pb2.BlockRequest()
+        response = self.stub.GetLatestBlock(request)
+        return response.number
+
+    def verify_address(self, address: str) -> bool:
+        request = communication_pb2.VerifyAddressRequest(address=address)
+        response = self.stub.VerifyAddress(request)
+        return response.is_verified
+
+
 app_settings = AppSettings()
 database_settings = DatabaseSettings()
 token_settings = TokenSettings()
 outer_microservice_settings = OuterMicroserviceSettings()
+
+second_service = Microservice2Client()

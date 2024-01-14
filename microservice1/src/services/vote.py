@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from api.v1.schemas import vote
-from config import outer_microservice_settings as outer_service
+from config import second_service
 from db.models import User, Vote
 
 
@@ -18,7 +18,7 @@ async def create_vote(
     await check_if_user_votes(user, proposal_id, session)
 
     user_balance = await check_and_return_balance(user.wallet_address)
-    block_number = await get_latest_block()
+    block_number = second_service.get_latest_block()
 
     await create(user.id, proposal_id, user_balance, block_number, data, session)
 
@@ -77,34 +77,8 @@ async def create(
         )
 
 
-async def get_balance(address: str) -> int:
-    data = await connect_to_outer_service(outer_service.GET_BALANCE, address)
-    return data["balance"]
-
-
-async def get_latest_block():
-    data = await connect_to_outer_service(outer_service.GET_LATEST_BLOCK)
-    return data["number"]
-
-
-async def connect_to_outer_service(url: str, address: str | None = None) -> Any:
-    current_object = address if address else ""
-    url = url + current_object
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        data = response.json()
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail=data["detail"],
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        return data
-
-
 async def check_and_return_balance(address: str) -> Decimal:
-    balance = await get_balance(address)
+    balance = second_service.get_balance(address)
     balance = Decimal(balance)
     if not balance > 0:
         raise HTTPException(

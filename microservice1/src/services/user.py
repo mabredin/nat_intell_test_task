@@ -8,11 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from api.v1.schemas import user as UserSchema
-from config import outer_microservice_settings as outer_service
-from config import token_settings
+from config import second_service, token_settings
 from db.base import get_session
 from db.models import User
-from services.vote import connect_to_outer_service, get_latest_block
 
 
 async def get_user_by_id(user_id: int, session: AsyncSession) -> User:
@@ -71,14 +69,14 @@ async def create_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    is_verified = await verify_address(new_user.wallet_address)
+    is_verified = second_service.verify_address(new_user.wallet_address)
     if not is_verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Введеный адрес кошелька не существует",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    block_number = await get_latest_block()
+    block_number = second_service.get_latest_block()
     user = User(
         username=new_user.username,
         hashed_password=token_settings.bcrypt_context.hash(new_user.hashed_password),
@@ -115,8 +113,3 @@ async def is_exist_wallet(
     if user:
         return True
     return False
-
-
-async def verify_address(address: str) -> bool:
-    data = await connect_to_outer_service(outer_service.VERIFY_ADDRESS, address)
-    return data["is_verified"]

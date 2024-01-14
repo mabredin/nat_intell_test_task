@@ -5,9 +5,33 @@ from starlette import status
 from web3 import Web3
 
 import schemas
-from config import ENDPOINT
+from config import INFURA_ENDPOINT
+from protobufs import communication_pb2, communication_pb2_grpc
 
-w3 = Web3(Web3.HTTPProvider(ENDPOINT))
+w3 = Web3(Web3.HTTPProvider(INFURA_ENDPOINT))
+
+
+class CommunicatorServicer(communication_pb2_grpc.CommunicatorServicer):
+    def GetBalance(self, request, context):
+        reply = communication_pb2.BalanceReply()
+        schema = get_balance_by_address(request.address)
+        reply.balance = str(schema.balance)
+        return reply
+
+    def GetLatestBlock(self, request, context):
+        reply = communication_pb2.BlockReply()
+        schema = get_info_by_latest_block()
+        reply.number = schema.number
+        reply.count_transactions = schema.count_transactions
+        reply.difficulty = schema.difficulty
+        reply.time = schema.time
+        return reply
+
+    def VerifyAddress(self, request, context):
+        reply = communication_pb2.VerifyAddressReply()
+        schema = verify_address(request.address)
+        reply.is_verified = schema.is_verified
+        return reply
 
 
 def get_balance_by_address(address: str) -> schemas.GetBalance:

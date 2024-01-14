@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package communication;
+
+service Communicator {
+	rpc GetBalance (BalanceRequest) returns (BalanceReply);
+	
+	rpc GetLatestBlock (BlockRequest) returns (BlockReply);
+
+	rpc VerifyAddress (VerifyAddressRequest) returns (VerifyAddressReply);
+}
+
+message BalanceRequest {
+  string address = 1;
+}
+
+message BalanceReply {
+  string balance = 1;
+}
+
+message BlockRequest {
+
+}
+
+message BlockReply {
+  int32 number = 1;
+  int32 count_transactions = 2;
+  int32 difficulty = 3;
+  string time = 4;
+}
+
+message VerifyAddressRequest {
+  string address = 1;
+}
+
+message VerifyAddressReply {
+  bool is_verified = 1;
+}

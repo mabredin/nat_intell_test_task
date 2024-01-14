@@ -20,4 +20,4 @@ ENV PYTHONPATH=$PYTHONPATH:/app/src PATH=/app/.venv/bin:$PATH
 COPY --from=builder /app/.venv .venv
 COPY ./src ./src
 
-CMD ["uvicorn", "main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "src/main.py"]
