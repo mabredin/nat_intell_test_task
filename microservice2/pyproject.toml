@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "nat-intel-microservice-2"
+version = "0.1.0"
+description = ""
+authors = ["mabredin <mbredin@bk.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "0.108.0"
+web3 = "^6.14.0"
+python-dotenv = "^1.0.0"
+uvicorn = "0.25.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.1"
+isort = "^5.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
