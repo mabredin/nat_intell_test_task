@@ -22,7 +22,6 @@ class VoteGet(BaseModel):
 
 
 class VoteCreate(BaseModel):
-    proposal_id: int
     is_like: bool = False
 
 

@@ -33,5 +33,5 @@ def create_access_token(
         expires = datetime.now(timezone.utc) + timedelta(minutes=15)
     payload.update({"exp": expires})
     return jwt.encode(
-        payload, token_settings.SECRET_KEY, algorithm=token_settings.ALGORITHM
+        payload, token_settings.SECRET_KEY_TOKEN, algorithm=token_settings.ALGORITHM
     )

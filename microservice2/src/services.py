@@ -46,7 +46,7 @@ def verify_address(address: str) -> schemas.GetVerify:
             detail="Не удалось подключиться к сети goerli",
         )
 
-    is_address = w3.is_address(address)
+    is_address = check_is_address(address)
     is_contract = check_is_contract(address)
     is_verified = check_is_verified(is_address, is_contract)
     return schemas.GetVerify(is_verified=is_verified)
@@ -56,8 +56,26 @@ def is_connected(w3: Web3) -> bool:
     return w3.is_connected()
 
 
+def check_is_address(address: str) -> bool:
+    try:
+        is_address = w3.is_address(address)
+        return is_address
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Указанный адрес неверен или является контрактом",
+        )
+
+
 def check_is_contract(address: str) -> bool:
-    return True if w3.eth.get_code(address) else False
+    try:
+        result = w3.eth.get_code(address)
+        return True if result else False
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Указанный адрес неверен или является контрактом",
+        )
 
 
 def check_is_verified(is_address: bool, is_contract: bool) -> bool:

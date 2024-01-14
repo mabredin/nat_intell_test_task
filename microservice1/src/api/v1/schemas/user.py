@@ -9,7 +9,6 @@ class GetFullUser(BaseModel):
     block_number: int
     is_active: bool = True
     is_superuser: bool = False
-    is_verified: bool = False
 
 
 class CreateUser(BaseModel):
@@ -17,7 +16,6 @@ class CreateUser(BaseModel):
     hashed_password: str
     email: str | None = None
     wallet_address: str
-    block_number: int
     is_superuser: bool = False
 
 

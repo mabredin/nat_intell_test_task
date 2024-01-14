@@ -1,5 +1,6 @@
 from typing import Annotated, Sequence
 
+import httpx
 from fastapi import Depends, HTTPException
 from jose import JWTError, jwt
 from sqlalchemy import select
@@ -7,9 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from api.v1.schemas import user as UserSchema
+from config import outer_microservice_settings as outer_service
 from config import token_settings
 from db.base import get_session
 from db.models import User
+from services.vote import connect_to_outer_service, get_latest_block
 
 
 async def get_user_by_id(user_id: int, session: AsyncSession) -> User:
@@ -36,7 +39,9 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(
-            token, token_settings.SECRET_KEY, algorithms=[token_settings.ALGORITHM]
+            token,
+            token_settings.SECRET_KEY_TOKEN,
+            algorithms=[token_settings.ALGORITHM],
         )
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
@@ -62,15 +67,24 @@ async def create_user(
     if wallet:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Пользователь с таким кошельком существует",
+            detail="Пользователь с таким адресом кошелька существует",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    is_verified = await verify_address(new_user.wallet_address)
+    if not is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Введеный адрес кошелька не существует",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    block_number = await get_latest_block()
     user = User(
         username=new_user.username,
         hashed_password=token_settings.bcrypt_context.hash(new_user.hashed_password),
         email=new_user.email,
         wallet_address=new_user.wallet_address,
-        block_number=new_user.block_number,
+        block_number=block_number,
         is_superuser=new_user.is_superuser,
     )
 
@@ -81,7 +95,7 @@ async def create_user(
             username=new_user.username,
             email=new_user.email,
             wallet_address=new_user.wallet_address,
-            block_number=new_user.block_number,
+            block_number=block_number,
             is_superuser=new_user.is_superuser,
         )
     except Exception as e:
@@ -101,3 +115,8 @@ async def is_exist_wallet(
     if user:
         return True
     return False
+
+
+async def verify_address(address: str) -> bool:
+    data = await connect_to_outer_service(outer_service.VERIFY_ADDRESS, address)
+    return data["is_verified"]
