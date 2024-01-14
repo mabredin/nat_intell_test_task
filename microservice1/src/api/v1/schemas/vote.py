@@ -27,5 +27,5 @@ class VoteCreate(BaseModel):
 
 class VoteResult(BaseModel):
     proposal_id: int | None
-    likes_count: int = 0
-    dislikes_count: int = 0
+    likes_count: int | Decimal = 0
+    dislikes_count: int | Decimal = 0

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Any
 
 import httpx
@@ -16,7 +17,7 @@ async def create_vote(
 ) -> vote.VoteGet:
     await check_if_user_votes(user, proposal_id, session)
 
-    user_balance = await check_balance(user.wallet_address)
+    user_balance = await check_and_return_balance(user.wallet_address)
     block_number = await get_latest_block()
 
     await create(user.id, proposal_id, user_balance, block_number, data, session)
@@ -53,7 +54,7 @@ async def get_vote_by_proposal_and_user(
 async def create(
     user_id: int,
     proposal_id: int,
-    user_balance: int,
+    user_balance: Decimal,
     block_number: int,
     data: vote.VoteCreate,
     session: AsyncSession,
@@ -102,8 +103,9 @@ async def connect_to_outer_service(url: str, address: str | None = None) -> Any:
         return data
 
 
-async def check_balance(address: str) -> bool:
+async def check_and_return_balance(address: str) -> Decimal:
     balance = await get_balance(address)
+    balance = Decimal(balance)
     if not balance > 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
