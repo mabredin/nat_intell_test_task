@@ -13,7 +13,6 @@ services:
     environment:
       - PROJECT_NAME=Voting service
       - DEBUG=True
-      - DRIVER=postgres+asyncpg
       - POSTGRES_DB=nat_intel
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
